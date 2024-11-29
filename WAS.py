@@ -9,6 +9,13 @@ if "text" not in st.session_state:
 if "prev_text" not in st.session_state:
     st.session_state.prev_text = ""  # 이전 텍스트 상태 (되돌리기용)
 
+# 제목 및 설명
+st.title("글쓰기 도우미")
+st.markdown("""
+이 도구는 글쓰기 도우미입니다. 나만의 소설을 작성하는 과정에서 막히는 부분이 생겼을 때 AI가 소설의 뒷내용을 자연스럽게 작성해줍니다.  
+AI가 작성해준 뒷내용 중에 마음에 들지 않는 내용은 삭제 및 수정을 하면서 나만의 소설을 완성해 봅시다.
+""")
+
 # 텍스트 입력/결과 창 (하나의 창에서 입력과 결과를 관리)
 new_text = st.text_area(
     "여기에 텍스트를 입력하세요",
