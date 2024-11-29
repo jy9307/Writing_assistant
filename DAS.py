@@ -85,27 +85,6 @@ body {
 </style>
 """, unsafe_allow_html=True)
 
-# 배경 이미지 선택
-backgrounds = {
-    "기본": None,
-    "판타지 소설": "https://example.com/fantasy.jpg",
-    "SF 소설": "https://example.com/sf.jpg",
-    "로맨스 소설": "https://example.com/romance.jpg",
-}
-selected_background = st.sidebar.selectbox("배경 이미지 선택", options=list(backgrounds.keys()))
-st.session_state.background_image = backgrounds[selected_background]
-
-if st.session_state.background_image:
-    st.markdown(f"""
-    <style>
-    body {{
-        background-image: url('{st.session_state.background_image}');
-        background-size: cover;
-        background-attachment: fixed;
-        background-position: center;
-    }}
-    </style>
-    """, unsafe_allow_html=True)
 
 # 모드 선택
 modes = ["창의적 소설 모드", "단편 소설 모드", "서사적 소설 모드"]

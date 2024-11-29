@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 
-user_df = pd.read_csv("users.csv")
+user_df = pd.read_csv("users.csv", dtype={'번호': str})
 user_dict = {}
 for i in range(len(user_df)) :
-    user_dict[user_df.iloc[i,1]] = user_df.iloc[i,1]
+    user_dict[user_df.iloc[i,1]] = user_df.iloc[i,0]
 
 
 # 초기 세션 상태 설정
@@ -17,6 +17,7 @@ def login(username, password):
     if password == user_dict[username]:  # 예시로 고정된 계정
         st.session_state.logged_in = True
         st.success("로그인 성공!")
+        st.rerun()
     else:
         st.error("아이디 또는 비밀번호가 잘못되었습니다.")
 
