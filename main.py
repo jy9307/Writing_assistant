@@ -1,4 +1,11 @@
 import streamlit as st
+import pandas as pd
+
+user_df = pd.read_csv("users.csv")
+user_dict = {}
+for i in range(len(user_df)) :
+    user_dict[user_df.iloc[i,1]] = user_df.iloc[i,1]
+
 
 # 초기 세션 상태 설정
 if "logged_in" not in st.session_state:
@@ -7,7 +14,7 @@ if "logged_in" not in st.session_state:
 # 로그인 함수
 def login(username, password):
     # 사용자 인증 로직
-    if username == "admin" and password == "password":  # 예시로 고정된 계정
+    if password == user_dict[username]:  # 예시로 고정된 계정
         st.session_state.logged_in = True
         st.success("로그인 성공!")
     else:

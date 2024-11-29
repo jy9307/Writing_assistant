@@ -3,6 +3,9 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # 초기 세션 상태 설정
 if "conversation_log" not in st.session_state:
