@@ -61,44 +61,25 @@ if st.button("문장 이어서 쓰기"):
 
     # 기존 텍스트에 이어서 추가
     st.session_state.text.append( f" {result}")
-    st.rerun()  # UI를 즉시 업데이트
+    st.rerun() 
 
-if len(st.session_state.text) > 0:
-    if st.button("직전 문장으로 돌아가기"):
-        if len(st.session_state.prev_text) > 0:
-            # text를 이전 상태로 복원
-            st.session_state.text = st.session_state.prev_text[-1]
-            # prev_text에서 마지막 복원 상태 제거
-            st.session_state.prev_text = st.session_state.prev_text[:-1]
-            st.rerun()
-        else:
-            st.warning("복구할 이전 상태가 없습니다!")
-
-# 텍스트 출력
-if len(st.session_state.text) > 0:
-    # 두 리스트의 최소 길이
-    min_length = min(len(st.session_state.text), len(st.session_state.prev_text))
-    
-    # prev_text와 text 모두 있는 인덱스에 대해 출력
-    for i in range(min_length):
-        col1, col2 = st.columns(2)
-        with col1:
-            st.write("내가 작성한 내용")
-            st.write(st.session_state.prev_text[i])
-        with col2:
-            st.write("AI가 수정해준 내용")
-            st.write(st.session_state.text[i])
-    
-    # 만약 text가 prev_text보다 길어서 나머지가 있다면
-    if len(st.session_state.text) > min_length:
-        for i in range(min_length, len(st.session_state.text)):
-            col1, col2 = st.columns(2)
-            with col1:
+# 텍스트 출력 (세션 상태에 반영된 텍스트를 업데이트)
+if st.session_state.text :
+    for i in range(len(st.session_state.text)) :
+        print("현재", st.session_state.text)
+        print("아까", st.session_state.prev_text)
+        col1, col2 = st.columns(2) 
+        with col1 :
+            with st.container(border=True):
                 st.write("내가 작성한 내용")
-                st.write("이전 상태 없음")  # 이전 상태가 없는 경우
-            with col2:
+                if st.session_state.prev_text :
+                    print(i)
+                    st.write(f"{st.session_state.prev_text[i]}", height=200)
+
+        with col2 :
+            with st.container(border=True):
                 st.write("AI가 수정해준 내용")
-                st.write(st.session_state.text[i])
+                st.write(f"{st.session_state.text[i]}", height=200)
 
 
 # "복사하기" 버튼 동작
