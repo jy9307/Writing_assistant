@@ -2,12 +2,15 @@ import streamlit as st
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # 초기 세션 상태 설정
 if "text" not in st.session_state:
-    st.session_state.text = ""  # 현재 텍스트 상태
+    st.session_state.text = []  # 현재 텍스트 상태
 if "prev_text" not in st.session_state:
-    st.session_state.prev_text = ""  # 이전 텍스트 상태 (되돌리기용)
+    st.session_state.prev_text = []  # 이전 텍스트 상태 (되돌리기용)
 
 # 제목 및 설명
 st.title("글쓰기 도우미")
@@ -16,24 +19,31 @@ st.markdown("""
 AI가 작성해준 뒷내용 중에 마음에 들지 않는 내용은 삭제 및 수정을 하면서 나만의 소설을 완성해 봅시다.
 """)
 
+print(st.session_state.text)
+print(st.session_state.prev_text)
+if not st.session_state.text :
+    first_value = ""
+else :
+    first_value = st.session_state.text[-1]
 # 텍스트 입력/결과 창 (하나의 창에서 입력과 결과를 관리)
 new_text = st.text_area(
     "여기에 텍스트를 입력하세요",
-    value=st.session_state.text,
+    value= first_value,
     height=200
 )
-
-# 텍스트가 수정된 경우 세션 상태 업데이트
-if new_text != st.session_state.text:
-    st.session_state.text = new_text
+    
 
 # "문장 이어서 쓰기" 버튼 동작
 if st.button("문장 이어서 쓰기"):
     # 현재 텍스트 상태를 이전 상태로 저장 (되돌리기용)
-    st.session_state.prev_text = st.session_state.text
+    st.session_state.prev_text.append(new_text)
+    
 
     generate_prompt = ChatPromptTemplate.from_messages([
-        ("system", """지금까지 작성된 글을 읽고, 글의 내용을 자연스럽게 이어서 한 문장을 작성해봐."""),
+        ("system", """
+         지금까지 작성된 글을 읽고, 글의 내용을 자연스럽게 이어서 한 문장을 작성해봐. 필요에 따라 대화하는 표현은 큰따옴표, 생각하는 표현은 작은따옴표로 나타내줘. 
+         지금까지 작성한 내용은 지우지 말고 계속 써줘.
+         """),
         ("human", "{input}")
     ])
 
@@ -46,24 +56,50 @@ if st.button("문장 이어서 쓰기"):
 
     # 현재 텍스트를 입력으로 사용해 이어쓰기 처리
     result = chain.invoke({
-        "input": st.session_state.text
+        "input": new_text
     })
 
     # 기존 텍스트에 이어서 추가
-    st.session_state.text += f" {result}"
+    st.session_state.text.append( f" {result}")
     st.rerun()  # UI를 즉시 업데이트
 
-# "직전 문장으로 돌아가기" 버튼 동작
-if st.button("직전 문장으로 돌아가기"):
-    if st.session_state.prev_text:
-        st.session_state.text = st.session_state.prev_text  # 이전 텍스트 상태로 복원
-        st.session_state.prev_text = ""  # 복원 후 이전 상태 초기화
-        st.rerun()  # UI를 즉시 업데이트
-    else:
-        st.warning("복구할 이전 상태가 없습니다!")
+if len(st.session_state.text) > 0:
+    if st.button("직전 문장으로 돌아가기"):
+        if len(st.session_state.prev_text) > 0:
+            # text를 이전 상태로 복원
+            st.session_state.text = st.session_state.prev_text[-1]
+            # prev_text에서 마지막 복원 상태 제거
+            st.session_state.prev_text = st.session_state.prev_text[:-1]
+            st.rerun()
+        else:
+            st.warning("복구할 이전 상태가 없습니다!")
 
-# 텍스트 출력 (세션 상태에 반영된 텍스트를 업데이트)
-st.text_area("현재까지의 입력 결과", value=st.session_state.text, height=200)
+# 텍스트 출력
+if len(st.session_state.text) > 0:
+    # 두 리스트의 최소 길이
+    min_length = min(len(st.session_state.text), len(st.session_state.prev_text))
+    
+    # prev_text와 text 모두 있는 인덱스에 대해 출력
+    for i in range(min_length):
+        col1, col2 = st.columns(2)
+        with col1:
+            st.write("내가 작성한 내용")
+            st.write(st.session_state.prev_text[i])
+        with col2:
+            st.write("AI가 수정해준 내용")
+            st.write(st.session_state.text[i])
+    
+    # 만약 text가 prev_text보다 길어서 나머지가 있다면
+    if len(st.session_state.text) > min_length:
+        for i in range(min_length, len(st.session_state.text)):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write("내가 작성한 내용")
+                st.write("이전 상태 없음")  # 이전 상태가 없는 경우
+            with col2:
+                st.write("AI가 수정해준 내용")
+                st.write(st.session_state.text[i])
+
 
 # "복사하기" 버튼 동작
 if st.button("복사하기"):
